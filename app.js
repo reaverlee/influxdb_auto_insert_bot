@@ -1,23 +1,10 @@
-require("dotenv").config();
-const express = require('express');
 const Influx = require('influx'); 
-const morgan = require("morgan");
-const cors = require("cors");
-
-const app = express();
-
-app.use(express.json());
-app.use(cors());
-app.use(morgan("combined"));
-
-const port = process.env.PORT || 3000; 
-
 
 const influx = new Influx.InfluxDB({
-  host: process.env.INFLUXDB_HOST || '192.168.0.101:8086', 
-  database: process.env.INFLUXDB_DATABASE || 'test', 
-  username: process.env.INFLUXDB_USERNAME || 'admin', 
-  password: process.env.INFLUXDB_PASSWORD || 'Bizmyhand1!', 
+  host:'192.168.0.101:8086', 
+  database:'test', 
+  username:'admin', 
+  password:'Bizmyhand1!'
 });
 
 
@@ -63,7 +50,3 @@ const insertData = () => {
 };
 
 insertData();
-
-app.listen(port, () => {
-  console.log(`Server is running on ${port}`);
-});
