@@ -18,7 +18,6 @@ const influx = new Influx.InfluxDB({
   database: process.env.INFLUXDB_DATABASE || 'test', 
   username: process.env.INFLUXDB_USERNAME || 'admin', 
   password: process.env.INFLUXDB_PASSWORD || 'Bizmyhand1!', 
-  port: process.env.INFLUXDB_PORT || 8086, // 포트 설정
 });
 
 
@@ -65,8 +64,6 @@ const insertData = () => {
 
 insertData();
 
-setInterval(insertData, 60000);
-
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server is running on ${port}`);
 });
