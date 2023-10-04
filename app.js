@@ -1,12 +1,13 @@
-const Influx = require('influx'); 
+const { InfluxDB, Point } = require("@influxdata/influxdb-client");
 
-const influx = new Influx.InfluxDB({
-  host:'192.168.0.101:8086', 
-  database:'test', 
-  username:'admin', 
-  password:'Bizmyhand1!'
-});
+const token =
+  "5jW-CW1XbrDXn3qlCVK2d6_eCwYzxUTHdgWxSvQ5SeccQqCct1NrgxSlHVlq_C8QnjWE8jNM2IQXd-PxQEBsMw==";
+const org = "bacf0ed090bbf72f";
+const bucket = "test";
 
+const client = new InfluxDB({ url: "http://192.168.0.101:8086", token });
+
+const influx = client.getWriteApi(org, bucket);
 
 const insertData = () => {
   const random = (min, max) => {
@@ -23,29 +24,26 @@ const insertData = () => {
   const tvoc = random(112, 118);
   const o2 = random(16, 21);
 
+  const point = new Point("test_table")
+    .tag("dev_id", "6363")
+    .floatField("temp", temp)
+    .floatField("humi", humi)
+    .floatField("THI", THI)
+    .floatField("pm10", pm10)
+    .floatField("pm25", pm25)
+    .floatField("pm1", pm1)
+    .floatField("co2", co2)
+    .floatField("tvoc", tvoc)
+    .floatField("o2", o2);
+
+  influx.writePoint(point);
   influx
-    .writePoints([
-      {
-        measurement: "test_table",
-        tags: { dev_id: "6363" },
-        fields: {
-          temp: temp,
-          humi: humi,
-          THI: THI,
-          pm10: pm10,
-          pm25: pm25,
-          pm1: pm1,
-          co2: co2,
-          tvoc: tvoc,
-          o2: o2,
-        },
-      },
-    ])
+    .close()
     .then(() => {
       console.log("데이터가 성공적으로 삽입되었습니다.");
     })
-    .catch((err) => {
-      console.error(`데이터 삽입 중 오류 발생: ${err}`);
+    .catch((error) => {
+      console.error(`데이터 삽입 중 오류 발생: ${error}`);
     });
 };
 
