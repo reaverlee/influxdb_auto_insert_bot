@@ -16,18 +16,6 @@ const getToken = async () => {
   }
 };
 
-// const token = getToken();
-// const token = process.env.INFLUX_TOKEN;
-
-// const client = new InfluxDB({
-//   url: process.env.INFLUX_HOST_URL,
-//   token: token,
-// });
-// const influx = client.getWriteApi(
-//   process.env.INFLUX_ORG,
-//   process.env.INFLUXDB_BUCKET
-// );
-
 const initializeInflux = async () => {
   const token = await getToken();
   const client = new InfluxDB({
