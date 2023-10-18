@@ -1,47 +1,38 @@
-const { InfluxDB, Point } = require("@influxdata/influxdb-client");
+require("dotenv").config();
 
-const token =
-  "5jW-CW1XbrDXn3qlCVK2d6_eCwYzxUTHdgWxSvQ5SeccQqCct1NrgxSlHVlq_C8QnjWE8jNM2IQXd-PxQEBsMw==";
-const org = "bacf0ed090bbf72f";
-const bucket = "test";
+const express = require("express");
+const cors = require("cors");
+const morgan = require("morgan");
+const axios = require("axios");
+const routes = require("./api/routes/index");
 
-const client = new InfluxDB({ url: "http://192.168.0.101:8086", token });
+const app = express();
 
-const influx = client.getWriteApi(org, bucket);
+app.use(cors());
+app.use(morgan("combined"));
+app.use(express.json());
+app.use(routes);
 
-const insertData = () => {
+app.get("/ping", function (req, res) {
+  res.status(200).json({ message: "pong" });
+});
+
+const checkInfluxDBHealth = async () => {
   try {
-    const random = (min, max) => {
-      return Math.floor(Math.random() * (max - min)) + min;
-    };
-
-    const temp = random(17, 23);
-    const humi = random(61, 66);
-    const THI = random(1, 5);
-    const pm10 = random(7, 12);
-    const pm25 = random(7, 12);
-    const pm1 = random(7, 12);
-    const co2 = random(1066, 1071);
-    const tvoc = random(112, 118);
-    const o2 = random(16, 21);
-
-    const point = new Point("test_table")
-      .tag("dev_id", "6363")
-      .floatField("temp", temp)
-      .floatField("humi", humi)
-      .floatField("THI", THI)
-      .floatField("pm10", pm10)
-      .floatField("pm25", pm25)
-      .floatField("pm1", pm1)
-      .floatField("co2", co2)
-      .floatField("tvoc", tvoc)
-      .floatField("o2", o2);
-
-    influx.writePoint(point);
-    console.log("데이터가 성공적으로 삽입되었습니다.");
+    const response = await axios.get(`${process.env.INFLUX_HOST_URL}/health`);
+    if (response.status === 204) {
+      console.log("InfluxDB is healthy");
+    } else {
+      console.log("InfluxDB health status:", response.status);
+    }
   } catch (error) {
-    console.error(`데이터 삽입 중 오류 발생: ${error}`);
+    console.error("Error checking InfluxDB health:", error);
   }
 };
 
-setInterval(() => insertData(), 100);
+const PORT = process.env.PORT;
+
+app.listen(PORT, async () => {
+  await checkInfluxDBHealth();
+  console.log(`Listening to request on port: ${PORT}`);
+});
